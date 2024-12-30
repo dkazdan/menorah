@@ -50,7 +50,7 @@ class menorah:
             self.candle_number = candle_number
             self.n_pixels = n_pixels
             self.first_pixel = self.candle_number * self.n_pixels
-            self.candle_yellow = (100,75,0)
+            self.candle_yellow = (50,35,0)
             self.flame_red = (200,0,0)
 
         def light_candle(self):
@@ -75,12 +75,6 @@ class menorah:
 
 
 if __name__ == "__main__":
-    try:
-        Menorah = menorah(n_candles=1)
-        #candle0.light_candle()
-        
-        #burncandle()
-        #lightcandle()
-    except KeyboardInterrupt:
-        pixels.fill((0,0,0))
-        pixels.show()
+
+    Menorah = menorah(n_candles=1)
+    #candle0.light_candle()
