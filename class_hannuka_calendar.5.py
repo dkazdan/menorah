@@ -29,7 +29,7 @@ DK
 from pyluach.dates import HebrewDate # https://pyluach.readthedocs.io/en/latest/dates.html
 from astral.sun import sun # https://sffjunkie.github.io/astral/
 from astral import LocationInfo
-from  timezonefinder import TimezoneFinder
+from timezonefinder import TimezoneFinder
 from zoneinfo import ZoneInfo
 
 import pytz # will calculate time zone from lat/lon. Use eventually for GPS timing.
@@ -94,11 +94,11 @@ class hannuka_calendar:
             day_of_week = self.python_sunsets_datetime[i].strftime("%w") # 0  = Sunday; 5 = Friday
             if (day_of_week == '5'): # '5' = Friday, erev shabbos
                 self.python_candlelighting_times.append(self.python_sunsets_datetime[i] - timedelta(minutes=20))
-                print('python_candlelighting_times: ', self.python_candlelighting_times[i], '(erev shabbos)')
+                #print('python_candlelighting_times: ', self.python_candlelighting_times[i], '(erev shabbos)')
             else: # weekday
                 self.python_candlelighting_times.append(self.python_sunsets_datetime[i] + timedelta(minutes=10))
-                print('python_candlelighting_times: ', self.python_candlelighting_times[i])
-            print('corresponding sunrise: ', self.python_sunrises_datetime[i])
+                #print('python_candlelighting_times: ', self.python_candlelighting_times[i])
+            #print('corresponding sunrise: ', self.python_sunrises_datetime[i])
         
 if __name__ == '__main__':
     hc = hannuka_calendar()

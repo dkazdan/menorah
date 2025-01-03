@@ -38,16 +38,18 @@ class menorah:
         self.candle_yellow = (100,75,0)
         self.flame_red = (200,0,0)
         Candles=[]
-        for i in range (0, n_candles):
+        for i in range (0, n_candles): # 0, 8 covers hanukkah candles 1 through 8 plus shamash
             # print(i)
-            Candles.append(self.candle(self, i, 8))
+            Candles.append(self.candle(self, i, n_pixels=8))
         Candles[0].light_candle()
 
 
     class candle:
-        def __init__(self, menorah, candle_number,n_pixels):
+        # sets up indiidual candles in the NeoPixel string. 45 minutes for weekday hanukkah candles; use 90 minutes for shabbos.
+        def __init__(self, menorah, candle_number,n_pixels=8, minutes=90):
             self.menorah=menorah
             self.candle_number = candle_number
+            self.burning_time = 60 * minutes # burning time in seconds
             self.n_pixels = n_pixels
             self.first_pixel = self.candle_number * self.n_pixels
             self.candle_yellow = (50,35,0)
@@ -65,7 +67,8 @@ class menorah:
                 self.menorah.pixels.fill((0,0,0)) # extinguish candle
                 return
             # else
-            burn_time = abs(random.gauss(5,1))  # might have negative tail
+            segment_burning_time = self.burning_time / (self.n_pixels-1)
+            burn_time = abs(random.gauss(segment_burning_time, segment_burning_time/10))  # might have negative tail
             sleep(burn_time)
             last_wax -= 1
             self.menorah.pixels[last_wax] = self.flame_red
