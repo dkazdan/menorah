@@ -18,7 +18,6 @@ DK
 # https://docs.circuitpython.org/projects/neopixel/en/latest/api.html
 import board, neopixel, sched, random
 from time import time, sleep
-s = sched.scheduler(time, sleep)
 
 num_pixels = 8 # on each candle's neopixel strip
 pixel_pin = board.D18
@@ -46,7 +45,7 @@ class menorah:
 
     class candle:
         # sets up indiidual candles in the NeoPixel string. 45 minutes for weekday hanukkah candles; use 90 minutes for shabbos.
-        def __init__(self, menorah, candle_number,n_pixels=8, minutes=90):
+        def __init__(self, menorah, candle_number,n_pixels=8, minutes=1):
             self.menorah=menorah
             self.candle_number = candle_number
             self.burning_time = 60 * minutes # burning time in seconds
@@ -78,6 +77,14 @@ class menorah:
 
 
 if __name__ == "__main__":
-
-    Menorah = menorah(n_candles=1)
-    #candle0.light_candle()
+    # try sched library here
+    s = sched.scheduler(time, sleep)
+    
+    def light_candle():
+        print('light_candle()')
+        Menorah = menorah(n_candles=1)
+    #light_candle()
+    print('starting schedule')
+    s.enter(1, 1, light_candle)
+    print('ended schedule')
+    
