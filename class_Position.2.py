@@ -113,5 +113,5 @@ class Position:
 
 
 if __name__ == "__main__":
-    Pos = Position()
-    print(Pos.pos)
+    Pos = Position()  # instantiate an object
+    print(Pos.pos)    # object state variable is dictionary with lat and lon

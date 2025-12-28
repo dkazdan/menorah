@@ -1,6 +1,13 @@
 """
 class hannuka_calendar
 
+Pertinent state variables:
+        self.python_sunsets_datetime = [] # sunsets for candlighting days in Python datetime format, timezone aware
+        self.python_sunrises_datetime= [] # sunrises ending candlighting times in Python datetime format, timezone aware
+
+Pertinent methods:
+
+
 Prepares a list of local hannukah candlelighting times for the next or current hannukah
 in the given location. They are in python datetime.datetime objects, aware of local time zone.
 Also prepares list of corresponding sunrises, for checking last possible candlelighting times.
@@ -73,12 +80,13 @@ class hannuka_calendar:
         
     # create array of datetime objects for candlelighting sunsets
     def find_h_and_p_sunset_dates(self):
-        # find today's Hebrew year.
-        h_now=HebrewDate.today()
+        # find today's Hebrew year.  First the Hebrew calendar day:
+        h_now=HebrewDate.today() # and pick out the year
         h_year=h_now.year
-        # might be after hannuka in current Hebrew year, so check:
-        if h_now > HebrewDate(h_year, 9, 24).add(days=9): # holiday is over for this year
-            h_now += 1 # so get ready for next year.
+        # today might be after hannuka even in current Hebrew year, so check:
+        if h_now > HebrewDate(h_year, 9, 24).add(days=9): # holiday is over for this year or into the next year
+            h_now += 1 # so get ready for next year by starting this later
+            # TODO: Verify this works in current Hebrew year if before holiday. I think it does but check.
         # create array of hanukkah days
         h_days = [] # candlelighting days, accounting for spill into next month
         for day in range(0,8):
@@ -122,6 +130,12 @@ class hannuka_calendar:
                     formatted_output = self.python_candlelighting_times[i].strftime("%Y-%m-%d %H:%M")
                     print('Candle ', i+1, f'{formatted_output}')
             # print('corresponding sunrise: ', self.python_sunrises_datetime[i])
+            
+    def get_candlighting_times(self):
+        return self.python_candlelighting_times
+    
+    def get_sunrises(self):
+        return self.python_sunrises_datetime
         
 if __name__ == '__main__':
     hc = hannuka_calendar()
