@@ -17,6 +17,8 @@ v. 9 Rewritten from v.8 after different query
 v. 10 Start implementing some changes ChatGPT suggests such as graceful extinguish and flame sparkle
 v. 11 Getting ready to install full 9 candles. Set NUM_CANDLES to 1 in test code.
 Resaved as class_menorah.py 29 Dec 2025
+30 Dec 2025
+Added shamash behavior, candle 0 is marked as shamash and that increases its burn time 50%.
 DK
 """
 
@@ -30,7 +32,7 @@ import neopixel
 
 class Menorah:
     class Candle:
-        def __init__(self, pixels, start, length, burn_minutes=60):
+        def __init__(self, pixels, start, length, burn_minutes=60, is_shamash=False):
             # pixels is object representing entire LED strip (say, 9 candles x 8 LEDs/candle)
             # start is index of this strip (candle 0 -> index 0, candle 1 -> index 8, candle 2 -> index 16 etc.
             # length is number of LEDs per strip; here, 8.
@@ -39,9 +41,12 @@ class Menorah:
             self.pixels = pixels # object for entire strip
             self.start = start   # index along strip for this candle
             self.length = length # number of LEDs in this candle
+            self.is_shamash = is_shamash # candle [0] should be shamash, has different behavior
 
             base = burn_minutes * 60  # burn time in seconds without randomizer.
-            self.burn_duration = base * random.uniform(0.9, 1.1)  # include randomizer; might use Gaussian
+            if self.is_shamash:
+                base *= 1.5           # have shamash burn 50% longer than other candles.
+            self.burn_duration = base * random.uniform(0.8, 1.2)  # include randomizer; might use Gaussian
             self.start_time = time.monotonic()
             self.burned_out = False
 
@@ -53,9 +58,9 @@ class Menorah:
 
         def update(self, now):
             if self.burned_out:
-                self._clear()
+                # self._clear()  # clear already happened when candle burned out
                 return
-
+            # else:
             elapsed = now - self.start_time
             progress = min(elapsed / self.burn_duration, 1.0) # fraction of candle burned
 
@@ -72,19 +77,17 @@ class Menorah:
                 self.pixels[idx] = self.wax_color if i < remaining - 1 else (0, 0, 0) # extinguish
 
             # flicker, set colors
-            if now >= self.next_flicker:
+            if now >= self.next_flicker: # change flame intensity, compute next flicker time
                 self.flame_scale = random.uniform(0.7, 1.2) # change to Gaussian?
-                #self.flame_scale = random.gauss(1.0, 1.2) # change to Gaussian?
                 self.next_flicker = now + random.uniform(0.06, 0.18)
-                #self.next_flicker = now + random.gauss(0.1, 0.2)
 
             flame_idx = self.start + remaining - 1 # highest-number LED among the remaining
             self.pixels[flame_idx] = self._scale(self.flame_color, self.flame_scale)
 
-        def _scale(self, color, scale):
+        def _scale(self, color, scale): # set new flame tuple
             return tuple(min(255, int(c * scale)) for c in color)
 
-        def _clear(self):
+        def _clear(self): # extinguish this candle
             for i in range(self.start, self.start + self.length):
                 self.pixels[i] = (0, 0, 0)
 
@@ -104,7 +107,8 @@ class Menorah:
                 pixels=self.pixels,
                 start=start,
                 length=leds_per_candle,
-                burn_minutes=30
+                burn_minutes=30,
+                is_shamash=(i == 0) # candle [0] gets set to shamash behavior
             )
             self.candles.append(candle)
 
@@ -124,7 +128,7 @@ class Menorah:
         for candle in self.candles:
             if candle.burned_out == False:
                 return False # any one candle still burning means not all burned out
-        return True # if got here, they're all burned out
+        return True          # if got here, they're all burned out
             
             
 """
@@ -158,12 +162,12 @@ if __name__ == "__main__":
     menorah = Menorah(led_strip)
 
     try:
-        while True:
+        while True: # loop updates all candles at 50 frames per second
             now = time.monotonic()
             menorah.update(now)
             led_strip.show()
-            time.sleep(0.02)   # ~50 FPS
-            if menorah.all_burned_out() == True:
+            time.sleep(0.02)   # 0.02 seconds = 50 FPS
+            if menorah.all_burned_out() == True: # all candles are down to zero length
                 menorah.clear()
                 print("candles all burned out")
                 exit()
