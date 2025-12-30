@@ -16,6 +16,7 @@ v. 8 Restart writing this 20 December 2025 after some ChatGPT queries.
 v. 9 Rewritten from v.8 after different query
 v. 10 Start implementing some changes ChatGPT suggests such as graceful extinguish and flame sparkle
 v. 11 Getting ready to install full 9 candles. Set NUM_CANDLES to 1 in test code.
+Resaved as class_menorah.py 29 Dec 2025
 DK
 """
 
@@ -44,7 +45,7 @@ class Menorah:
             self.start_time = time.monotonic()
             self.burned_out = False
 
-            self.wax_color = (5, 5, 40) # RGB (255, 120, 40) original from ChatGPT
+            self.wax_color = (5, 5, 20) # RGB (255, 120, 40) original from ChatGPT
             self.flame_color = (100, 45, 10)
 
             self.next_flicker = self.start_time
@@ -73,7 +74,9 @@ class Menorah:
             # flicker, set colors
             if now >= self.next_flicker:
                 self.flame_scale = random.uniform(0.7, 1.2) # change to Gaussian?
-                self.next_flicker = now + random.uniform(0.03, 0.12)
+                #self.flame_scale = random.gauss(1.0, 1.2) # change to Gaussian?
+                self.next_flicker = now + random.uniform(0.06, 0.18)
+                #self.next_flicker = now + random.gauss(0.1, 0.2)
 
             flame_idx = self.start + remaining - 1 # highest-number LED among the remaining
             self.pixels[flame_idx] = self._scale(self.flame_color, self.flame_scale)
@@ -117,6 +120,12 @@ class Menorah:
         for candle in self.candles:
             candle._clear()
             
+    def all_burned_out(self):
+        for candle in self.candles:
+            if candle.burned_out == False:
+                return False # any one candle still burning means not all burned out
+        return True # if got here, they're all burned out
+            
             
 """
 Test code
@@ -136,13 +145,13 @@ if __name__ == "__main__":
         pixel_order=neopixel.GRB
     )
     
-    # TEST CODE TO START ALL LEDS
-    
-    for i in range(NUM_LEDS):
-        led_strip[i] = (0, 0, 55)
-
-    led_strip.show()
-    time.sleep(2)
+#     # TEST CODE TO START ALL LEDS
+#     
+#     for i in range(NUM_LEDS):
+#         led_strip[i] = (0, 0, 55)
+# 
+#     led_strip.show()
+#     time.sleep(2)
 
 
 #    menorah = Menorah(pixels)
@@ -154,6 +163,10 @@ if __name__ == "__main__":
             menorah.update(now)
             led_strip.show()
             time.sleep(0.02)   # ~50 FPS
+            if menorah.all_burned_out() == True:
+                menorah.clear()
+                print("candles all burned out")
+                exit()
     except KeyboardInterrupt:
         menorah.clear()
         led_strip.show()
