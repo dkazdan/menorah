@@ -86,7 +86,22 @@ class hannuka_calendar:
         self.find_python_sunset_dates()
         self.python_candlelighting_times = [] # adjusted from sunset for erev shabbos and for weekdays
         self.find_python_candlighting_times() # fill array python_candlelighting_times
-        
+
+    def find_lat_lon(self):
+        # need code to check GPS receiver or WiFi for position
+        # if position available,
+            # self.lat =
+            # self.lon =
+            # find_timezone() and the time tuples
+        pass
+    
+    def find_timezone(self):
+        # need code to compute time zone from position
+        # if position available
+            #self.tz = pytz.timezone(timezone)
+        # call code that computes time and dates. For the moment, just duplicate the _init_ code here.
+        pass
+
     # create array of datetime objects for candlelighting sunsets, hebrew and Python
     def find_h_and_p_sunset_dates(self):
         h_now=HebrewDate.today() # find today's Hebrew year.  First the Hebrew calendar day:

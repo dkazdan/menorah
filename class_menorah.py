@@ -193,8 +193,8 @@ if __name__ == "__main__":
 #    menorah = Menorah(pixels)
     menorah = Menorah(led_strip)
 
-    NIGHT = 1   # i.e., light 3 candles + shamash
-    menorah.set_shabbos(True)
+    NIGHT = 5   # i.e., light 3 candles + shamash
+    menorah.set_shabbos(False)
     menorah.light_n_candles(NIGHT)
 
     try:
