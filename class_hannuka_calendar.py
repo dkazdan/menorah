@@ -40,6 +40,11 @@ Started 19 December 2024
 TODO:
     Regenerate the list for the next year's holiday.
     Verify that the code works if holiday extends into January.
+31 December 2025:
+    Had to reload libraries again.  Might need to load them in virtual environments.
+    Chanukah schedule is still the one for 2025, didn't load next years.
+    Probably need to get that in Hebrew years.
+    TODO!
 DK
 """
 
@@ -82,24 +87,21 @@ class hannuka_calendar:
         self.python_candlelighting_times = [] # adjusted from sunset for erev shabbos and for weekdays
         self.find_python_candlighting_times() # fill array python_candlelighting_times
         
-    # create array of datetime objects for candlelighting sunsets
+    # create array of datetime objects for candlelighting sunsets, hebrew and Python
     def find_h_and_p_sunset_dates(self):
         h_now=HebrewDate.today() # find today's Hebrew year.  First the Hebrew calendar day:
          # and pick out the year
         h_year=h_now.year
         # today might be after hannuka even in current Hebrew year, so check:
         if h_now > HebrewDate(h_year, 9, 24).add(days=9): # holiday is over for this year or into the next year
-            h_now += 1 # so get ready for next year by starting this later
-            # TODO: Verify this works in current Hebrew year if before holiday. I think it does but check.
+            # if got here, must be past chanukah for this Hebrew year (but before 1 Tishrei (rosh hashana))
+            h_year += 1 # So make calculations for next Hebrew year.
         # create array of hanukkah days
         h_days = [] # candlelighting days, accounting for spill into next month
-        for day in range(0,8):
+        for day in range(0,8): # holiday starts on the 25th, but need day-before sunsets, so use 24th as start day
             h_days.append(HebrewDate(h_year, 9, 24).add(days=day))
-            PSD=h_days[day].to_pydate()
+            PSD=h_days[day].to_pydate() # Python sunset date for that day
             self.python_sunset_dates.append(PSD)
-        # diagnostic: print that array. Comment out as needed.
-        # prints all 8 days of holiday for next or current Hebrew year
-        # print(h_days)
 
     def find_python_sunset_dates(self):
         # make array of sunsets local time/dates

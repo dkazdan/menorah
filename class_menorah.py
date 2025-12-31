@@ -30,6 +30,10 @@ import math # for ceil
 import board
 import neopixel
 
+NORMAL_BURN_MINUTES = 30
+SHABBOS_BURN_MINUTES = 120
+
+
 class Menorah:
     class Candle:
         def __init__(self, pixels, start, length, burn_minutes=60, is_shamash=False):
@@ -97,9 +101,12 @@ class Menorah:
 
     # -------- Menorah itself --------
     # Use a method call to restart the menorah each night
-    def __init__(self, strip, candles=9, leds_per_candle=8):
+    def __init__(self, strip, candles=9, leds_per_candle=8, shabbos=False):
         self.pixels = strip
         self.candles = []
+        self.shabbos = shabbos
+        
+        burn_minutes = SHABBOS_BURN_MINUTES if shabbos else NORMAL_BURN_MINUTES # defined at top of file
 
         for i in range(candles):
             start = i * leds_per_candle
@@ -108,9 +115,34 @@ class Menorah:
                 start=start,
                 length=leds_per_candle,
                 burn_minutes=30,
-                is_shamash=(i == 0) # candle [0] gets set to shamash behavior
+                is_shamash = (i == 0) # candle [0] gets set to shamash behavior
             )
             self.candles.append(candle)
+            
+    def set_shabbos(self, shabbos: bool):  # Call this method when lighting if day is Friday
+        burn_minutes = SHABBOS_BURN_MINUTES if shabbos else NORMAL_BURN_MINUTES
+
+        for candle in self.candles:
+            base = burn_minutes * 60 # base amount of time for candle burn, seconds
+            if candle.is_shamash:
+                base *= 1.5    # shamash should burn longer than mitzvah candles
+            candle.burn_duration = base * random.uniform(0.9, 1.1)
+            candle.relight()
+
+    def light_n_candles(self, n):
+        """
+        Light shamash + first n candles.
+        n = number of regular candles
+        n = 0 will light shamash only
+        """
+        for i, candle in enumerate(self.candles):
+            if candle.is_shamash:
+                candle.relight()
+            elif 1 <= i <= n:
+                candle.relight()
+            else:
+                candle.burned_out = True
+
 
     def update(self, now):
         for candle in self.candles:
@@ -142,7 +174,7 @@ if __name__ == "__main__":
 
 #    pixels = neopixel.NeoPixel(
     led_strip = neopixel.NeoPixel(
-        board.D21,
+        board.D21, # NOTE: Not usual D18
         NUM_LEDS,
         brightness=0.3,
         auto_write=False,
@@ -160,6 +192,10 @@ if __name__ == "__main__":
 
 #    menorah = Menorah(pixels)
     menorah = Menorah(led_strip)
+
+    NIGHT = 1   # i.e., light 3 candles + shamash
+    menorah.set_shabbos(True)
+    menorah.light_n_candles(NIGHT)
 
     try:
         while True: # loop updates all candles at 50 frames per second
