@@ -44,7 +44,9 @@ TODO:
     Had to reload libraries again.  Might need to load them in virtual environments.
     Chanukah schedule is still the one for 2025, didn't load next years.
     Probably need to get that in Hebrew years.
-    TODO!
+    Done.
+    TODO: Look for GPS receiver, adjust place/time if it is found.Else:
+        Check for WiFi, adjust if that is found.
 DK
 """
 
@@ -59,14 +61,20 @@ import pytz # will calculate time zone from lat/lon. Use eventually for GPS timi
 
 from datetime import datetime, timedelta
 
+from gps import gps, WATCH_ENABLE, WATCH_NEWSTYLE
+import time
+
 
 
 class hannuka_calendar:
     def __init__(self):
-        # hard-code one locationn to start:
+        # hard-code one default locationn:
         self.CWRU = LocationInfo("Glennan", "USA", "America/New_York", 41.5014728, -81.6099031)
-        self.lat = self.CWRU.latitude
-        self.lon = self.CWRU.longitude
+#         self.lat = self.CWRU.latitude
+#         self.lon = self.CWRU.longitude
+        pos = self.find_lat_lon() # from GPS, WiFi, or default
+        self.lat = pos['latitude']  # syntax for dictionary access
+        self.lon = pos['longitude']
         tf = TimezoneFinder() # python package providing offline timezone lookups for WGS84 coordinates
         # TODO: Set lat/lon by GPS; have method for setting lat/lon externally
         timezone = tf.timezone_at(lat=self.lat, lng=self.lon) # returns string such as 'Europe/Paris' or 'America/New_York'
@@ -88,12 +96,39 @@ class hannuka_calendar:
         self.find_python_candlighting_times() # fill array python_candlelighting_times
 
     def find_lat_lon(self):
-        # need code to check GPS receiver or WiFi for position
-        # if position available,
-            # self.lat =
-            # self.lon =
-            # find_timezone() and the time tuples
-        pass
+        GPS_pos = self.get_gps_location()
+        if GPS_pos != None:
+            return {'source':'GPS', 'latitude':GPS_pos.lat, 'longitude':GPS_pos.lon}
+        # elif WiFi_pos == None # (# insert WiFi position check here)
+        else:
+            print('no GPS')
+            lat = self.CWRU.latitude
+            lon = self.CWRU.longitude
+            default_pos = {'source':'default', 'latitude':lat, 'longitude':lon}
+            return default_pos
+    
+    def get_gps_location(self, timeout=10): # check if GPS position is available; get location if it is.
+        session = gps(mode=WATCH_ENABLE | WATCH_NEWSTYLE)
+        start_GPS_search = time.time()
+
+        for report in session:
+            if report.get("class") != "DEVICE":
+                return None # no GPS plugged in
+
+            if (time.time()-start_GPS_search) > timeout:
+                print('timed out in GPS search')
+                break
+
+            if report['class'] == 'TPV':
+                lat = getattr(report, 'lat', None)
+                lon = getattr(report, 'lon', None)
+                if lat is not None and lon is not None:
+                    return {
+                        "source": "gps",
+                        "lat": lat,
+                        "lon": lon
+                    }
+        return None
     
     def find_timezone(self):
         # need code to compute time zone from position
