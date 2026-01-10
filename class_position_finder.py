@@ -98,7 +98,7 @@ class position_finder:
 
     def get_position(self): # returns a dictionary source, lat, lon, timezone
         if self._gps_possible():
-            return pf._get_gps_location()
+            return self._get_gps_location()
         else:
             return self.default_pos
     
@@ -106,5 +106,8 @@ class position_finder:
 if __name__ == '__main__':
     print('class position_finder test code')
     pf = position_finder()
+    position_dictionary = pf.get_position()
     
-    print('pf.get_position: ', pf.get_position(), '\n') # works for case GPS present.  Check without GPS.
+    print('pf.get_position: ',position_dictionary , '\n') # works for case GPS present.  Check without GPS.
+    print('\nExample of reading from dictionary:')
+    print('source is: ', position_dictionary['source'])
