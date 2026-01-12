@@ -55,6 +55,16 @@ class menorah_scheduler:
         self.cl_times = self.hc.get_candlighting_times()
         self.sr_times = self.hc.get_sunrises()
         
+        # 3) determine if first lighting should be immediate or should wait for next
+        #    candlelighting time in self.cl_times
+        # if NOW is after last sunset, generate next set of times and advance Hebrew year.
+        # else work backwards
+        #   if NOW is after candlelighting time AND it's shabbos, WAIT until next lighting time
+        #   else if NOW is after a candlelighting time AND before the associated sunrise time, LIGHT
+        #
+        
+        
+    # Public interfaces
     def get_candlelighting_times(self):
         return self.cl_times
     

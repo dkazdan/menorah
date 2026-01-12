@@ -70,13 +70,10 @@ class hannuka_calendar:
     def __init__(self):
         # hard-code one default locationn:
         self.CWRU = LocationInfo("Glennan", "USA", "America/New_York", 41.5014728, -81.6099031)
-#         self.lat = self.CWRU.latitude
-#         self.lon = self.CWRU.longitude
         pos = self.find_lat_lon() # from GPS, WiFi, or default
         self.lat = pos['latitude']  # syntax for dictionary access
         self.lon = pos['longitude']
         tf = TimezoneFinder() # python package providing offline timezone lookups for WGS84 coordinates
-        # TODO: Set lat/lon by GPS; have method for setting lat/lon externally
         timezone = tf.timezone_at(lat=self.lat, lng=self.lon) # returns string such as 'Europe/Paris' or 'America/New_York'
         self.tz = pytz.timezone(timezone) # class 'pytz.tzfile.America/New_York' Zoneinfo may be better; pytz is deprecated.
         
@@ -210,3 +207,5 @@ if __name__ == '__main__':
         
     now_tz = hc.get_now()
     print('\ncurrent time from getter method: ', now_tz)
+    
+    print('get_gps_location: ', hc.get_gps_location())
