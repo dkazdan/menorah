@@ -119,29 +119,6 @@ class Menorah:
             )
             self.candles.append(candle)
             
-    def set_shabbos(self, shabbos: bool):  # Call this method when lighting if day is Friday
-        burn_minutes = SHABBOS_BURN_MINUTES if shabbos else NORMAL_BURN_MINUTES
-
-        for candle in self.candles:
-            base = burn_minutes * 60 # base amount of time for candle burn, seconds
-            if candle.is_shamash:
-                base *= 1.5    # shamash should burn longer than mitzvah candles
-            candle.burn_duration = base * random.uniform(0.9, 1.1)
-            candle.relight()
-
-    def light_n_candles(self, n):
-        """
-        Light shamash + first n candles.
-        n = number of regular candles
-        n = 0 will light shamash only
-        """
-        for i, candle in enumerate(self.candles):
-            if candle.is_shamash:
-                candle.relight()
-            elif 1 <= i <= n:
-                candle.relight()
-            else:
-                candle.burned_out = True
 
 
     def update(self, now):
@@ -160,7 +137,36 @@ class Menorah:
         for candle in self.candles:
             if candle.burned_out == False:
                 return False # any one candle still burning means not all burned out
-        return True          # if got here, they're all burned out
+        menorah.clear()      # just for completeness. If got here, they're all burned out
+        return True
+
+    # ------  External inteface methods
+
+    def set_shabbos(self, shabbos: bool):  # Call this method when lighting if day is Friday
+        burn_minutes = SHABBOS_BURN_MINUTES if shabbos else NORMAL_BURN_MINUTES
+
+        for candle in self.candles:
+            base = burn_minutes * 60 # base amount of time for candle burn, seconds
+            if candle.is_shamash:
+                base *= 1.5    # shamash should burn longer than mitzvah candles
+            candle.burn_duration = base * random.uniform(0.9, 1.1)
+            candle.relight()
+
+
+    def light_n_candles(self, n):
+        """
+        Light shamash + first n candles.
+        n = number of regular candles
+        n = 0 will light shamash only
+        """
+        for i, candle in enumerate(self.candles):
+            if candle.is_shamash:
+                candle.relight()
+            elif 1 <= i <= n:
+                candle.relight()
+            else:
+                candle.burned_out = True
+
             
             
 """
@@ -168,11 +174,12 @@ Test code
 """
 
 if __name__ == "__main__":
+    print('test code: class_menorah.py')
+
     NUM_CANDLES = 9
     LEDS_PER_CANDLE = 8
     NUM_LEDS = NUM_CANDLES * LEDS_PER_CANDLE
 
-#    pixels = neopixel.NeoPixel(
     led_strip = neopixel.NeoPixel(
         board.D21, # NOTE: Not usual D18
         NUM_LEDS,
@@ -181,22 +188,12 @@ if __name__ == "__main__":
         pixel_order=neopixel.GRB
     )
     
-#     # TEST CODE TO START ALL LEDS
-#     
-#     for i in range(NUM_LEDS):
-#         led_strip[i] = (0, 0, 55)
-# 
-#     led_strip.show()
-#     time.sleep(2)
-
-
-#    menorah = Menorah(pixels)
     menorah = Menorah(led_strip)
 
-    NIGHT = 5   # i.e., light 3 candles + shamash
-    menorah.set_shabbos(False)
+    NIGHT = 7   # i.e., light 3 candles + shamash
+    menorah.set_shabbos(True)
     menorah.light_n_candles(NIGHT)
-
+    print('entering animation loop')
     try:
         while True: # loop updates all candles at 50 frames per second
             now = time.monotonic()
@@ -208,5 +205,6 @@ if __name__ == "__main__":
                 print("candles all burned out")
                 exit()
     except KeyboardInterrupt:
+        print('KeyboardInterrup; clear LEDs')
         menorah.clear()
         led_strip.show()
